@@ -12,6 +12,14 @@ class Item(BaseModel):
 items = []
 
 
+@app.post("/items", status_code=201)
+def create_item(item: Item):
+    new_item = {"id": len(items) + 1, **item.model_dump()}
+
+    items.append(new_item)
+    return new_item
+
+
 @app.get("/items")
 def get_items():
     return items
@@ -26,9 +34,11 @@ def get_item(item_id: int):
     raise HTTPException(status_code=404, detail="Item not found")
 
 
-@app.post("/items")
-def create_item(item: Item):
-    new_item = {"id": len(items) + 1, **item.model_dump()}
+@app.delete("/items/{item_id}", status_code=204)
+def delete_item(item_id: int):
+    for index, item in enumerate(items):
+        if item_id == item["id"]:
+            items.pop(index)
+            return
 
-    items.append(new_item)
-    return new_item
+    raise HTTPException(status_code=404, detail="Item not found")
